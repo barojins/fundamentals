@@ -33,12 +33,13 @@ export function maxWindowSum(nums: number[], k: number): number {
 
 // Variable sliding window — O(n) time, O(n) space
 export function longestUniqueSubstring(text: string): number {
+  const chars = Array.from(text);
   const lastSeen = new Map<string, number>();
   let left = 0;
   let best = 0;
-  for (let right = 0; right < text.length; right++) {
-    left = Math.max(left, (lastSeen.get(text[right]) ?? -1) + 1);
-    lastSeen.set(text[right], right);
+  for (let right = 0; right < chars.length; right++) {
+    left = Math.max(left, (lastSeen.get(chars[right]) ?? -1) + 1);
+    lastSeen.set(chars[right], right);
     best = Math.max(best, right - left + 1);
   }
   return best;
@@ -137,7 +138,7 @@ export function dfsRecursive<T>(graph: Graph<T>, start: T): T[] {
   return order;
 }
 
-// Iterative DFS — O(V + E) time, O(V) space
+// Iterative DFS — O(V + E) time, O(V + E) space
 export function dfsIterative<T>(graph: Graph<T>, start: T): T[] {
   const order: T[] = [];
   const seen = new Set<T>();
@@ -248,11 +249,11 @@ export function mergeIntervals(intervals: number[][]): number[][] {
 }
 
 // Dijkstra (non-negative weights) — O((V + E) log V) time
-export type WeightedGraph = Map<string, Array<[string, number]>>;
+export type WeightedGraph<T> = Map<T, Array<[T, number]>>;
 
-export function dijkstra(graph: WeightedGraph, start: string): Map<string, number> {
-  const distances = new Map<string, number>([[start, 0]]);
-  const heap = new MinHeap<[number, string]>((a, b) => a[0] < b[0]);
+export function dijkstra<T>(graph: WeightedGraph<T>, start: T): Map<T, number> {
+  const distances = new Map<T, number>([[start, 0]]);
+  const heap = new MinHeap<[number, T]>((a, b) => a[0] < b[0]);
   heap.push([0, start]);
   while (heap.size) {
     const [distance, node] = heap.pop()!;
@@ -270,6 +271,9 @@ export function dijkstra(graph: WeightedGraph, start: string): Map<string, numbe
 
 // Dynamic programming (minimum coins) — O(amount * coins) time
 export function coinChange(coins: number[], amount: number): number {
+  if (amount < 0 || coins.some((coin) => coin <= 0)) {
+    throw new Error("coins must be positive and amount non-negative");
+  }
   const dp = Array(amount + 1).fill(amount + 1);
   dp[0] = 0;
   for (let total = 1; total <= amount; total++) {

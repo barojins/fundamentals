@@ -145,7 +145,7 @@ def dfs_recursive(graph: Dict[T, List[T]], start: T) -> List[T]:
     return order
 
 
-# Iterative DFS — O(V + E) time, O(V) space
+# Iterative DFS — O(V + E) time, O(V + E) space
 def dfs_iterative(graph: Dict[T, List[T]], start: T) -> List[T]:
     order: List[T] = []
     seen: Set[T] = set()
@@ -228,6 +228,8 @@ def dijkstra(graph: Dict[T, List[Tuple[T, int]]], start: T) -> Dict[T, int]:
 
 # Dynamic programming (minimum coins) — O(amount * coins) time
 def coin_change(coins: List[int], amount: int) -> int:
+    if amount < 0 or any(coin <= 0 for coin in coins):
+        raise ValueError("coins must be positive and amount non-negative")
     dp = [amount + 1] * (amount + 1)
     dp[0] = 0
     for total in range(1, amount + 1):
