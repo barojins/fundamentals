@@ -34,7 +34,7 @@ def two_sum_sorted(nums: List[int], target: int) -> Optional[Tuple[int, int]]:
 def max_window_sum(nums: List[int], k: int) -> int:
     if k <= 0 or k > len(nums):
         raise ValueError("k must be between 1 and len(nums)")
-    window = sum(nums[:k])
+    window = sum(nums[index] for index in range(k))
     best = window
     for right in range(k, len(nums)):
         window += nums[right] - nums[right - k]
@@ -70,7 +70,8 @@ def max_subarray(nums: List[int]) -> int:
     if not nums:
         raise ValueError("nums must not be empty")
     current = best = nums[0]
-    for num in nums[1:]:
+    for index in range(1, len(nums)):
+        num = nums[index]
         current = max(num, current + num)
         best = max(best, current)
     return best

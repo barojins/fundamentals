@@ -22,7 +22,8 @@ export function twoSumSorted(nums: number[], target: number): [number, number] |
 // Fixed sliding window — O(n) time, O(1) space
 export function maxWindowSum(nums: number[], k: number): number {
   if (k <= 0 || k > nums.length) throw new Error("k must be between 1 and nums.length");
-  let window = nums.slice(0, k).reduce((sum, num) => sum + num, 0);
+  let window = 0;
+  for (let index = 0; index < k; index++) window += nums[index];
   let best = window;
   for (let right = k; right < nums.length; right++) {
     window += nums[right] - nums[right - k];
@@ -61,7 +62,8 @@ export function maxSubarray(nums: number[]): number {
   if (nums.length === 0) throw new Error("nums must not be empty");
   let current = nums[0];
   let best = nums[0];
-  for (const num of nums.slice(1)) {
+  for (let index = 1; index < nums.length; index++) {
+    const num = nums[index];
     current = Math.max(num, current + num);
     best = Math.max(best, current);
   }
