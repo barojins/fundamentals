@@ -1,23 +1,27 @@
 """Compact coding-interview templates."""
 
+from __future__ import annotations
+
 from collections import deque
+from collections.abc import Hashable, Iterable, Mapping, Sequence
 from heapq import heappop, heappush, nlargest
 from itertools import count
-from typing import Deque, Dict, Hashable, Iterable, List, Optional, Set, Tuple, TypeVar
 
-T = TypeVar("T", bound=Hashable)
+type Graph[T: Hashable] = Mapping[T, Sequence[T]]
+type WeightedGraph[T: Hashable] = Mapping[T, Sequence[tuple[T, int]]]
+type Interval = tuple[int, int]
 
 
 # Frequency map — O(n) time, O(n) space
-def frequencies(items: Iterable[T]) -> Dict[T, int]:
-    counts: Dict[T, int] = {}
+def frequencies[T: Hashable](items: Iterable[T]) -> dict[T, int]:
+    counts: dict[T, int] = {}
     for item in items:
         counts[item] = counts.get(item, 0) + 1
     return counts
 
 
 # Two pointers (sorted input) — O(n) time, O(1) space
-def two_sum_sorted(nums: List[int], target: int) -> Optional[Tuple[int, int]]:
+def two_sum_sorted(nums: Sequence[int], target: int) -> tuple[int, int] | None:
     left, right = 0, len(nums) - 1
     while left < right:
         total = nums[left] + nums[right]
@@ -31,7 +35,7 @@ def two_sum_sorted(nums: List[int], target: int) -> Optional[Tuple[int, int]]:
 
 
 # Fixed sliding window — O(n) time, O(1) space
-def max_window_sum(nums: List[int], k: int) -> int:
+def max_window_sum(nums: Sequence[int], k: int) -> int:
     if k <= 0 or k > len(nums):
         raise ValueError("k must be between 1 and len(nums)")
     window = sum(nums[index] for index in range(k))
@@ -44,7 +48,7 @@ def max_window_sum(nums: List[int], k: int) -> int:
 
 # Variable sliding window — O(n) time, O(n) space
 def longest_unique_substring(text: str) -> int:
-    last_seen: Dict[str, int] = {}
+    last_seen: dict[str, int] = {}
     left = best = 0
     for right, char in enumerate(text):
         left = max(left, last_seen.get(char, -1) + 1)
@@ -54,19 +58,19 @@ def longest_unique_substring(text: str) -> int:
 
 
 # Prefix sum — build O(n), range query O(1)
-def prefix_sums(nums: List[int]) -> List[int]:
+def prefix_sums(nums: Iterable[int]) -> list[int]:
     prefix = [0]
     for num in nums:
         prefix.append(prefix[-1] + num)
     return prefix
 
 
-def range_sum(prefix: List[int], left: int, right: int) -> int:
+def range_sum(prefix: Sequence[int], left: int, right: int) -> int:
     return prefix[right + 1] - prefix[left]
 
 
 # Kadane's algorithm — O(n) time, O(1) space
-def max_subarray(nums: List[int]) -> int:
+def max_subarray(nums: Sequence[int]) -> int:
     if not nums:
         raise ValueError("nums must not be empty")
     current = best = nums[0]
@@ -78,7 +82,7 @@ def max_subarray(nums: List[int]) -> int:
 
 
 # Binary search — O(log n) time, O(1) space
-def binary_search(nums: List[int], target: int) -> int:
+def binary_search(nums: Sequence[int], target: int) -> int:
     left, right = 0, len(nums) - 1
     while left <= right:
         middle = (left + right) // 2
@@ -92,14 +96,14 @@ def binary_search(nums: List[int], target: int) -> int:
 
 
 class ListNode:
-    def __init__(self, value: int, next_node: Optional["ListNode"] = None):
+    def __init__(self, value: int, next_node: ListNode | None = None) -> None:
         self.value = value
         self.next = next_node
 
 
 # Linked-list reversal — O(n) time, O(1) space
-def reverse_list(head: Optional[ListNode]) -> Optional[ListNode]:
-    previous = None
+def reverse_list(head: ListNode | None) -> ListNode | None:
+    previous: ListNode | None = None
     while head:
         following = head.next
         head.next = previous
@@ -108,9 +112,11 @@ def reverse_list(head: Optional[ListNode]) -> Optional[ListNode]:
 
 
 # Fast and slow pointers (cycle detection) — O(n) time, O(1) space
-def has_cycle(head: Optional[ListNode]) -> bool:
+def has_cycle(head: ListNode | None) -> bool:
     slow = fast = head
     while fast and fast.next:
+        if slow is None:
+            return False
         slow = slow.next
         fast = fast.next.next
         if slow is fast:
@@ -119,9 +125,9 @@ def has_cycle(head: Optional[ListNode]) -> bool:
 
 
 # Monotonic stack (next greater value) — O(n) time, O(n) space
-def next_greater(nums: List[int]) -> List[int]:
+def next_greater(nums: Sequence[int]) -> list[int]:
     answer = [-1] * len(nums)
-    stack: List[int] = []
+    stack: list[int] = []
     for index, num in enumerate(nums):
         while stack and nums[stack[-1]] < num:
             answer[stack.pop()] = num
@@ -130,9 +136,9 @@ def next_greater(nums: List[int]) -> List[int]:
 
 
 # Recursive DFS — O(V + E) time, O(V) space
-def dfs_recursive(graph: Dict[T, List[T]], start: T) -> List[T]:
-    order: List[T] = []
-    seen: Set[T] = set()
+def dfs_recursive[T: Hashable](graph: Graph[T], start: T) -> list[T]:
+    order: list[T] = []
+    seen: set[T] = set()
 
     def visit(node: T) -> None:
         if node in seen:
@@ -147,9 +153,9 @@ def dfs_recursive(graph: Dict[T, List[T]], start: T) -> List[T]:
 
 
 # Iterative DFS — O(V + E) time, O(V + E) space
-def dfs_iterative(graph: Dict[T, List[T]], start: T) -> List[T]:
-    order: List[T] = []
-    seen: Set[T] = set()
+def dfs_iterative[T: Hashable](graph: Graph[T], start: T) -> list[T]:
+    order: list[T] = []
+    seen: set[T] = set()
     stack = [start]
     while stack:
         node = stack.pop()
@@ -162,10 +168,10 @@ def dfs_iterative(graph: Dict[T, List[T]], start: T) -> List[T]:
 
 
 # BFS — O(V + E) time, O(V) space
-def bfs(graph: Dict[T, List[T]], start: T) -> List[T]:
-    order: List[T] = []
+def bfs[T: Hashable](graph: Graph[T], start: T) -> list[T]:
+    order: list[T] = []
     seen = {start}
-    queue: Deque[T] = deque([start])
+    queue: deque[T] = deque([start])
     while queue:
         node = queue.popleft()
         order.append(node)
@@ -177,9 +183,9 @@ def bfs(graph: Dict[T, List[T]], start: T) -> List[T]:
 
 
 # Backtracking (all subsets) — O(n * 2^n) time, O(n) recursion space
-def subsets(nums: List[int]) -> List[List[int]]:
-    answer: List[List[int]] = []
-    path: List[int] = []
+def subsets(nums: Sequence[int]) -> list[list[int]]:
+    answer: list[list[int]] = []
+    path: list[int] = []
 
     def backtrack(index: int) -> None:
         if index == len(nums):
@@ -195,40 +201,41 @@ def subsets(nums: List[int]) -> List[List[int]]:
 
 
 # Heap / top K — O(n log k) time, O(k) space
-def top_k(nums: List[int], k: int) -> List[int]:
+def top_k(nums: Iterable[int], k: int) -> list[int]:
     return nlargest(k, nums)
 
 
 # Merge intervals — O(n log n) time, O(n) space
-def merge_intervals(intervals: List[List[int]]) -> List[List[int]]:
-    merged: List[List[int]] = []
+def merge_intervals(intervals: Iterable[Interval]) -> list[Interval]:
+    merged: list[Interval] = []
     for start, end in sorted(intervals):
         if not merged or start > merged[-1][1]:
-            merged.append([start, end])
+            merged.append((start, end))
         else:
-            merged[-1][1] = max(merged[-1][1], end)
+            merged[-1] = (merged[-1][0], max(merged[-1][1], end))
     return merged
 
 
 # Dijkstra (non-negative weights) — O((V + E) log V) time
-def dijkstra(graph: Dict[T, List[Tuple[T, int]]], start: T) -> Dict[T, int]:
-    distances: Dict[T, int] = {start: 0}
+def dijkstra[T: Hashable](graph: WeightedGraph[T], start: T) -> dict[T, int]:
+    distances: dict[T, int] = {start: 0}
     sequence = count()
-    heap: List[Tuple[int, int, T]] = [(0, next(sequence), start)]
+    heap: list[tuple[int, int, T]] = [(0, next(sequence), start)]
     while heap:
         distance, _, node = heappop(heap)
         if distance != distances[node]:
             continue
         for neighbor, weight in graph.get(node, []):
             candidate = distance + weight
-            if candidate < distances.get(neighbor, float("inf")):
+            previous = distances.get(neighbor)
+            if previous is None or candidate < previous:
                 distances[neighbor] = candidate
                 heappush(heap, (candidate, next(sequence), neighbor))
     return distances
 
 
 # Dynamic programming (minimum coins) — O(amount * coins) time
-def coin_change(coins: List[int], amount: int) -> int:
+def coin_change(coins: Sequence[int], amount: int) -> int:
     if amount < 0 or any(coin <= 0 for coin in coins):
         raise ValueError("coins must be positive and amount non-negative")
     dp = [amount + 1] * (amount + 1)

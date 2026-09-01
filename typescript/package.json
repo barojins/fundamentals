@@ -1,0 +1,19 @@
+{
+  "name": "fundamentals-typescript",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=23.6"
+  },
+  "scripts": {
+    "check": "npm run typecheck && npm run format:check && npm test",
+    "format": "prettier --write '*.ts' '*.json'",
+    "format:check": "prettier --check '*.ts' '*.json'",
+    "test": "node templates.test.ts",
+    "typecheck": "tsc --project tsconfig.json"
+  },
+  "devDependencies": {
+    "prettier": "3.9.6",
+    "typescript": "7.0.2"
+  }
+}
