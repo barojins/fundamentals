@@ -41,7 +41,12 @@ class TemplateTests(unittest.TestCase):
         reversed_head = reverse_list(head)
         if reversed_head is None:
             self.fail("reversing a non-empty list returned None")
-        self.assertEqual(reversed_head.value, 3)
+        values: list[int] = []
+        current = reversed_head
+        while current:
+            values.append(current.value)
+            current = current.next
+        self.assertEqual(values, [3, 2, 1])
         self.assertFalse(has_cycle(reversed_head))
 
         cycle = ListNode(1, ListNode(2))
@@ -61,11 +66,11 @@ class TemplateTests(unittest.TestCase):
         self.assertEqual(dijkstra(weighted, 1), {1: 0, 3: 1, 2: 3})
 
     def test_combinatorial_patterns(self) -> None:
-        self.assertEqual(len(subsets((1, 2))), 4)
+        self.assertEqual(subsets((1, 2)), [[], [2], [1], [1, 2]])
         self.assertEqual(top_k((3, 1, 5, 2, 4), 3), [5, 4, 3])
         self.assertEqual(
             merge_intervals(((1, 3), (2, 6), (8, 10))),
-            [(1, 6), (8, 10)],
+            [[1, 6], [8, 10]],
         )
         self.assertEqual(coin_change((1, 2, 5), 11), 3)
         self.assertEqual(coin_change((2,), 3), -1)

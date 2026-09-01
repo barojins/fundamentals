@@ -1,7 +1,9 @@
 /** Compact coding-interview templates. */
 
 function itemAt<T>(items: readonly T[], index: number): T {
-  if (index < 0 || index >= items.length) throw new RangeError("index out of bounds");
+  if (!Number.isInteger(index) || index < 0 || index >= items.length || !(index in items)) {
+    throw new RangeError("index out of bounds");
+  }
   return items[index] as T;
 }
 
@@ -102,7 +104,7 @@ export function binarySearch(nums: readonly number[], target: number): number {
 }
 
 export class ListNode {
-  readonly value: number;
+  value: number;
   next: ListNode | null;
 
   constructor(value: number, next: ListNode | null = null) {

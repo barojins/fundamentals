@@ -9,7 +9,6 @@ from itertools import count
 
 type Graph[T: Hashable] = Mapping[T, Sequence[T]]
 type WeightedGraph[T: Hashable] = Mapping[T, Sequence[tuple[T, int]]]
-type Interval = tuple[int, int]
 
 
 # Frequency map — O(n) time, O(n) space
@@ -206,13 +205,18 @@ def top_k(nums: Iterable[int], k: int) -> list[int]:
 
 
 # Merge intervals — O(n log n) time, O(n) space
-def merge_intervals(intervals: Iterable[Interval]) -> list[Interval]:
-    merged: list[Interval] = []
-    for start, end in sorted(intervals):
+def merge_intervals(intervals: Iterable[Sequence[int]]) -> list[list[int]]:
+    normalized: list[tuple[int, int]] = []
+    for interval in intervals:
+        start, end = interval
+        normalized.append((start, end))
+
+    merged: list[list[int]] = []
+    for start, end in sorted(normalized):
         if not merged or start > merged[-1][1]:
-            merged.append((start, end))
+            merged.append([start, end])
         else:
-            merged[-1] = (merged[-1][0], max(merged[-1][1], end))
+            merged[-1][1] = max(merged[-1][1], end)
     return merged
 
 
