@@ -12,7 +12,7 @@ Each memory card below answers: when to use it, what it needs, why it works,
 and what to memorize. Indices returned by these templates are zero-based.
 """
 
-from collections import deque
+from collections import deque, Counter
 from heapq import heappop, heappush, nlargest
 from itertools import count
 
@@ -24,9 +24,7 @@ from itertools import count
 # MEMORIZE: counts[x] = counts.get(x, 0) + 1. Counter(items) is the shortcut.
 # COST: O(n) time, O(u) space for u unique items.
 def frequencies(items):
-    counts = {}
-    for item in items:
-        counts[item] = counts.get(item, 0) + 1
+    counts = Counter(items)
     return counts
 
 
