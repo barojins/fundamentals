@@ -74,6 +74,18 @@ class QuickTemplateTests(unittest.TestCase):
         self.assertEqual(coin_change([1, 2, 5], 11), 3)
         self.assertEqual(coin_change([2], 3), -1)
 
+    def test_invalid_inputs(self):
+        for k in (0, 4):
+            with self.subTest(k=k), self.assertRaises(ValueError):
+                max_window_sum([1, 2, 3], k)
+
+        with self.assertRaises(ValueError):
+            max_subarray([])
+
+        for coins, amount in (([1], -1), ([0, 1], 3), ([-1, 2], 3)):
+            with self.subTest(coins=coins, amount=amount), self.assertRaises(ValueError):
+                coin_change(coins, amount)
+
 
 if __name__ == "__main__":
     unittest.main()

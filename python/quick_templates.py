@@ -33,6 +33,9 @@ def two_sum_sorted(nums, target):
 
 # 고정 슬라이딩 윈도우 — O(n)
 def max_window_sum(nums, k):
+    if k <= 0 or k > len(nums):
+        raise ValueError("invalid window size")
+
     window = sum(nums[:k])
     answer = window
 
@@ -70,6 +73,9 @@ def range_sum(prefix, left, right):
 
 # 카데인: 최대 부분 배열 합 — O(n)
 def max_subarray(nums):
+    if not nums:
+        raise ValueError("nums is empty")
+
     current = answer = nums[0]
 
     for num in nums[1:]:
@@ -258,6 +264,9 @@ def dijkstra(graph, start):
 
 # DP: 최소 동전 개수 — O(amount * len(coins))
 def coin_change(coins, amount):
+    if amount < 0 or any(coin <= 0 for coin in coins):
+        raise ValueError("invalid coins or amount")
+
     dp = [amount + 1] * (amount + 1)
     dp[0] = 0
 
