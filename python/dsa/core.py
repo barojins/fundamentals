@@ -499,3 +499,155 @@ def dijkstra(graph, start):
                 distances[neighbor] = candidate
                 heappush(heap, (candidate, next(sequence), neighbor))
     return distances
+
+
+# WHEN: Include or exclude every item to generate all subsets.
+# NEED: nums is an iterable of values.
+# INVARIANT: path stores decisions made before index; recurse twice and undo.
+# MEMORIZE: branch without the item, then branch with it.
+# COST: O(n * 2^n) time, O(n) space excluding output.
+def subsets(nums):
+    answer, path = [], []
+
+    def backtrack(index):
+        if index == len(nums):
+            answer.append(path[:])
+            return
+        backtrack(index + 1)
+        path.append(nums[index])
+        backtrack(index + 1)
+        path.pop()
+
+    backtrack(0)
+    return answer
+
+
+# WHEN: Generate every ordering of the input items.
+# NEED: nums is an iterable of values.
+# INVARIANT: used[i] says whether item i is already in path.
+# MEMORIZE: choose an unused item, recurse, then undo the choice.
+# COST: O(n * n!) time, O(n) space excluding output.
+def permutations(nums):
+    answer, path, used = [], [], [False] * len(nums)
+
+    def backtrack():
+        if len(path) == len(nums):
+            answer.append(path[:])
+            return
+        for index, value in enumerate(nums):
+            if used[index]:
+                continue
+            used[index] = True
+            path.append(value)
+            backtrack()
+            path.pop()
+            used[index] = False
+
+    backtrack()
+    return answer
+
+
+# WHEN: Choose exactly size items without regard to order.
+# NEED: size is non-negative; nums is an iterable of values.
+# INVARIANT: future choices start after the last chosen index.
+# MEMORIZE: append a choice, recurse from index + 1, then pop it.
+# COST: O(size * C(n, size)) time, O(size) space excluding output.
+def combinations(nums, size):
+    if size < 0:
+        raise ValueError("size must be non-negative")
+    answer, path = [], []
+
+    def backtrack(start):
+        if len(path) == size:
+            answer.append(path[:])
+            return
+        needed = size - len(path)
+        for index in range(start, len(nums) - needed + 1):
+            path.append(nums[index])
+            backtrack(index + 1)
+            path.pop()
+
+    backtrack(0)
+    return answer
+
+
+# WHEN: Maximize a sum using no adjacent items.
+# NEED: nums is an iterable of comparable numeric values.
+# INVARIANT: rolling states are best totals through the previous two prefixes.
+# MEMORIZE: keep the old best or take this value plus the best before it.
+# COST: O(n) time, O(1) space.
+def max_non_adjacent_sum(nums):
+    previous_two = previous_one = 0
+    for num in nums:
+        previous_two, previous_one = previous_one, max(previous_one, previous_two + num)
+    return previous_one
+
+
+# WHEN: Find the minimum right/down path sum in a grid.
+# NEED: grid is non-empty and rectangular.
+# INVARIANT: dp[col] is the best cost to the current cell after update.
+# MEMORIZE: current cost is value plus the cheaper above/left predecessor.
+# COST: O(rows * cols) time, O(cols) space.
+def min_grid_path_sum(grid):
+    if not grid or not grid[0]:
+        raise ValueError("grid must be non-empty")
+    cols = len(grid[0])
+    if any(len(row) != cols for row in grid):
+        raise ValueError("grid must be rectangular")
+    dp = [float("inf")] * cols
+    dp[0] = 0
+    for row in grid:
+        for col, value in enumerate(row):
+            from_above = dp[col]
+            from_left = dp[col - 1] if col else float("inf")
+            dp[col] = value + min(from_above, from_left)
+    return dp[-1]
+
+
+# WHEN: Maximize value when each positive-weight item is used once.
+# NEED: weights and values have equal length; capacity is non-negative.
+# INVARIANT: descending capacity prevents reusing the current item.
+# MEMORIZE: dp[current] keeps the best value within that capacity.
+# COST: O(items * capacity) time, O(capacity) space.
+def knapsack_01(weights, values, capacity):
+    if len(weights) != len(values) or capacity < 0 or any(weight <= 0 for weight in weights):
+        raise ValueError("invalid knapsack input")
+    dp = [0] * (capacity + 1)
+    for weight, value in zip(weights, values, strict=True):
+        for current in range(capacity, weight - 1, -1):
+            dp[current] = max(dp[current], dp[current - weight] + value)
+    return dp[capacity]
+
+
+# WHEN: Find the fewest reusable coins for an exact amount.
+# NEED: coins are positive; amount is non-negative.
+# INVARIANT: dp[total] is the best exact construction of total so far.
+# MEMORIZE: try each coin and extend the best solution for total - coin.
+# COST: O(amount * coins) time, O(amount) space.
+def coin_change(coins, amount):
+    if amount < 0 or any(coin <= 0 for coin in coins):
+        raise ValueError("invalid coins or amount")
+    dp = [amount + 1] * (amount + 1)
+    dp[0] = 0
+    for total in range(1, amount + 1):
+        for coin in coins:
+            if coin <= total:
+                dp[total] = min(dp[total], dp[total - coin] + 1)
+    return -1 if dp[amount] > amount else dp[amount]
+
+
+# WHEN: Select a maximum-size set of non-overlapping intervals.
+# NEED: each interval has start <= end; endpoints may touch.
+# INVARIANT: earliest finish leaves maximal room for later choices.
+# MEMORIZE: sort by end and accept intervals starting at last_end or later.
+# COST: O(n log n) time, O(n) space.
+def interval_schedule(intervals):
+    chosen = []
+    last_end = float("-inf")
+    for start, end in sorted(intervals, key=lambda interval: interval[1]):
+        if start > end:
+            raise ValueError("interval start exceeds end")
+        if start >= last_end:
+            chosen.append((start, end))
+            last_end = end
+    return chosen

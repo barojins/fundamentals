@@ -7,6 +7,8 @@ from python.dsa.core import (
     UnionFind,
     bfs_graph,
     binary_search,
+    coin_change,
+    combinations,
     dfs_graph,
     dijkstra,
     frequencies,
@@ -14,18 +16,24 @@ from python.dsa.core import (
     grid_dfs,
     has_cycle,
     inorder_iterative,
+    interval_schedule,
+    knapsack_01,
     level_order,
     longest_unique_substring,
     lower_bound,
+    max_non_adjacent_sum,
     max_subarray,
     max_window_sum,
     merge_intervals,
+    min_grid_path_sum,
     next_greater,
+    permutations,
     postorder,
     prefix_sums,
     preorder,
     range_sum,
     reverse_list,
+    subsets,
     top_k,
     topological_sort,
     two_sum_sorted,
@@ -144,6 +152,36 @@ class GraphCoreTests(unittest.TestCase):
             grid_dfs(ragged_grid, (0, 0))
         with self.assertRaises(ValueError):
             grid_bfs_distance(ragged_grid, (0, 0), (1, 0))
+
+
+class CombinatorialCoreTests(unittest.TestCase):
+    def test_backtracking(self):
+        self.assertEqual(subsets([1, 2]), [[], [2], [1], [1, 2]])
+        self.assertEqual(permutations([1, 2]), [[1, 2], [2, 1]])
+        self.assertEqual(combinations([1, 2, 3], 2), [[1, 2], [1, 3], [2, 3]])
+
+    def test_dynamic_programming(self):
+        self.assertEqual(max_non_adjacent_sum([2, 7, 9, 3, 1]), 12)
+        self.assertEqual(min_grid_path_sum([[1, 3, 1], [1, 5, 1], [4, 2, 1]]), 7)
+        self.assertEqual(knapsack_01([2, 3, 4], [4, 5, 7], 5), 9)
+        self.assertEqual(coin_change([1, 2, 5], 11), 3)
+        self.assertEqual(coin_change([2], 3), -1)
+
+    def test_greedy_interval_selection(self):
+        self.assertEqual(
+            interval_schedule([(1, 3), (2, 4), (3, 5), (5, 7)]),
+            [(1, 3), (3, 5), (5, 7)],
+        )
+
+    def test_combinatorial_preconditions(self):
+        with self.assertRaises(ValueError):
+            combinations([1, 2], -1)
+        with self.assertRaises(ValueError):
+            min_grid_path_sum([])
+        with self.assertRaises(ValueError):
+            knapsack_01([1], [2, 3], 4)
+        with self.assertRaises(ValueError):
+            coin_change([0, 1], 3)
 
 
 if __name__ == "__main__":
