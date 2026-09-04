@@ -1,4 +1,6 @@
-# pyright: basic
+# pyright: reportUnknownArgumentType=false
+# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false
+
 import unittest
 
 from python.dsa.core import (
@@ -196,6 +198,172 @@ class GraphCoreTests(unittest.TestCase):
             grid_dfs(ragged_grid, (0, 0))
         with self.assertRaises(ValueError):
             grid_bfs_distance(ragged_grid, (0, 0), (1, 0))
+
+
+class FinalReviewRegressionTests(unittest.TestCase):
+    def test_merge_intervals_rejects_non_sequence_outer_container(self):
+        with self.assertRaises(ValueError):
+            merge_intervals({(1, 2)})
+
+    def test_merge_intervals_rejects_non_pair_sequence_members(self):
+        with self.assertRaises(ValueError):
+            merge_intervals(["12"])
+        with self.assertRaises(ValueError):
+            merge_intervals([{1, 2}])
+
+    def test_merge_intervals_accepts_tuple_containers_and_nonnumeric_endpoints(self):
+        self.assertEqual(
+            merge_intervals((("a", "b"), ["b", "d"])),
+            [["a", "d"]],
+        )
+
+    def test_interval_schedule_accepts_orderable_nonnumeric_endpoints(self):
+        self.assertEqual(
+            interval_schedule([("b", "c"), ("a", "b"), ("c", "d")]),
+            [("a", "b"), ("b", "c"), ("c", "d")],
+        )
+
+    def test_dijkstra_materializes_one_shot_adjacency(self):
+        graph = {
+            "a": iter((("b", 2),)),
+            "b": iter((("c", 3),)),
+            "z": iter(()),
+        }
+
+        self.assertEqual(dijkstra(graph, "a"), {"a": 0, "b": 2, "c": 5})
+
+
+class CoreDefiningEdgeCaseTests(unittest.TestCase):
+    def test_frequencies_accepts_empty_input(self):
+        self.assertEqual(frequencies([]), {})
+
+    def test_two_sum_sorted_returns_none_when_no_pair_exists(self):
+        self.assertIsNone(two_sum_sorted([1, 2, 3], 9))
+
+    def test_max_window_sum_rejects_an_empty_window(self):
+        with self.assertRaises(ValueError):
+            max_window_sum([1, 2], 0)
+
+    def test_longest_unique_substring_accepts_empty_text(self):
+        self.assertEqual(longest_unique_substring(""), 0)
+
+    def test_prefix_sums_accepts_empty_input(self):
+        self.assertEqual(prefix_sums([]), [0])
+
+    def test_range_sum_rejects_reversed_bounds(self):
+        with self.assertRaises(ValueError):
+            range_sum([0, 2, 5], 1, 0)
+
+    def test_max_subarray_rejects_empty_input(self):
+        with self.assertRaises(ValueError):
+            max_subarray([])
+
+    def test_binary_search_accepts_empty_input(self):
+        self.assertEqual(binary_search([], 4), -1)
+
+    def test_lower_bound_accepts_empty_input(self):
+        self.assertEqual(lower_bound([], 4), 0)
+
+    def test_next_greater_accepts_empty_input(self):
+        self.assertEqual(next_greater([]), [])
+
+    def test_merge_intervals_accepts_empty_input(self):
+        self.assertEqual(merge_intervals([]), [])
+
+    def test_merge_intervals_rejects_reversed_ranges(self):
+        with self.assertRaises(ValueError):
+            merge_intervals([[3, 1]])
+
+    def test_top_k_accepts_zero(self):
+        self.assertEqual(top_k([3, 1, 2], 0), [])
+
+    def test_list_node_defaults_to_an_isolated_zero_node(self):
+        node = ListNode()
+        self.assertEqual(node.val, 0)
+        self.assertIsNone(node.next)
+
+    def test_reverse_list_accepts_an_empty_list(self):
+        self.assertIsNone(reverse_list(None))
+
+    def test_has_cycle_rejects_a_single_acyclic_node(self):
+        self.assertFalse(has_cycle(ListNode(1)))
+
+    def test_tree_node_defaults_to_a_leaf(self):
+        node = TreeNode()
+        self.assertEqual(node.val, 0)
+        self.assertIsNone(node.left)
+        self.assertIsNone(node.right)
+
+    def test_preorder_accepts_an_empty_tree(self):
+        self.assertEqual(preorder(None), [])
+
+    def test_inorder_iterative_accepts_an_empty_tree(self):
+        self.assertEqual(inorder_iterative(None), [])
+
+    def test_postorder_accepts_an_empty_tree(self):
+        self.assertEqual(postorder(None), [])
+
+    def test_level_order_accepts_an_empty_tree(self):
+        self.assertEqual(level_order(None), [])
+
+    def test_dfs_graph_stays_reachable_with_missing_and_disconnected_keys(self):
+        graph = {0: [1], 2: [3]}
+        self.assertEqual(dfs_graph(graph, 0), [0, 1])
+
+    def test_bfs_graph_stays_reachable_with_missing_and_disconnected_keys(self):
+        graph = {0: [1], 2: [3]}
+        self.assertEqual(bfs_graph(graph, 0), [0, 1])
+
+    def test_grid_dfs_returns_empty_for_a_blocked_start(self):
+        self.assertEqual(grid_dfs([[1]], (0, 0)), set())
+
+    def test_grid_bfs_rejects_a_blocked_endpoint(self):
+        self.assertEqual(grid_bfs_distance([[1]], (0, 0), (0, 0)), -1)
+
+    def test_grid_bfs_reports_an_unreachable_goal(self):
+        self.assertEqual(grid_bfs_distance([[0, 1], [1, 0]], (0, 0), (1, 1)), -1)
+
+    def test_grid_bfs_returns_zero_when_start_equals_goal(self):
+        self.assertEqual(grid_bfs_distance([[0]], (0, 0), (0, 0)), 0)
+
+    def test_topological_sort_accepts_an_empty_graph(self):
+        self.assertEqual(topological_sort(0, []), [])
+
+    def test_union_find_rejects_access_into_an_empty_structure(self):
+        groups = UnionFind(0)
+        with self.assertRaises(ValueError):
+            groups.find(0)
+
+    def test_subsets_contains_the_empty_subset_for_empty_input(self):
+        self.assertEqual(subsets([]), [[]])
+
+    def test_permutations_contains_the_empty_ordering_for_empty_input(self):
+        self.assertEqual(permutations([]), [[]])
+
+    def test_combinations_contains_the_empty_choice_for_empty_input(self):
+        self.assertEqual(combinations([], 0), [[]])
+
+    def test_max_non_adjacent_sum_allows_an_empty_selection(self):
+        self.assertEqual(max_non_adjacent_sum([-4, -2, -9]), 0)
+
+    def test_max_non_adjacent_sum_accepts_empty_input(self):
+        self.assertEqual(max_non_adjacent_sum([]), 0)
+
+    def test_min_grid_path_sum_accepts_a_single_cell(self):
+        self.assertEqual(min_grid_path_sum([[7]]), 7)
+
+    def test_knapsack_01_accepts_zero_capacity(self):
+        self.assertEqual(knapsack_01([1], [2], 0), 0)
+
+    def test_coin_change_accepts_a_zero_amount(self):
+        self.assertEqual(coin_change([2], 0), 0)
+
+    def test_interval_schedule_accepts_empty_input(self):
+        self.assertEqual(interval_schedule([]), [])
+
+    def test_interval_schedule_rejects_reversed_ranges(self):
+        with self.assertRaises(ValueError):
+            interval_schedule([(3, 1)])
 
 
 class CombinatorialCoreTests(unittest.TestCase):

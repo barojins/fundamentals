@@ -1,5 +1,7 @@
 """DSA foundations worth reconstructing from memory."""
-# pyright: basic
+# pyright: reportMissingParameterType=false, reportUnknownParameterType=false
+# pyright: reportUnknownArgumentType=false, reportUnknownLambdaType=false
+# pyright: reportUnknownMemberType=false, reportUnknownVariableType=false
 
 from collections import deque  # noqa: F401
 from heapq import heappop, heappush, nlargest  # noqa: F401
@@ -154,21 +156,20 @@ def next_greater(nums):
     return answer
 
 
-# WHEN: Combine overlapping or touching intervals.
-# NEED: Each interval is [start, end] with start <= end.
+# WHEN: Combine overlapping or touching inclusive intervals.
+# NEED: Outer/pair containers are list/tuple; endpoints are mutually orderable; start <= end.
 # INVARIANT: answer is merged and sorted for all processed intervals.
 # MEMORIZE: append disjoint; otherwise extend answer[-1][1].
 # COST: O(n log n) time, O(n) space.
 def merge_intervals(intervals):
+    if not isinstance(intervals, (list, tuple)):
+        raise ValueError("intervals must be a list or tuple")
     answer = []
     normalized = []
     for interval in intervals:
-        try:
-            if len(interval) != 2:
-                raise ValueError("interval must contain start and end")
-            start, end = interval
-        except (TypeError, ValueError):
-            raise ValueError("interval must contain start and end") from None
+        if not isinstance(interval, (list, tuple)) or len(interval) != 2:
+            raise ValueError("interval must contain start and end")
+        start, end = interval
         normalized.append((start, end))
     for start, end in sorted(normalized):
         if start > end:
@@ -321,11 +322,11 @@ def level_order(root):
     return answer
 
 
-# WHEN: Visit every reachable vertex in depth-first order.
-# NEED: Graph adjacency lists; vertices are hashable.
+# WHEN: Visit every vertex reachable from start in depth-first order.
+# NEED: Hashable adjacency; neighbor-only keys may be absent; output is reachable only.
 # INVARIANT: visited contains exactly the vertices already emitted.
 # MEMORIZE: pop, skip visited, emit, then push neighbors in reverse order.
-# COST: O(V + E) time, O(V) space.
+# COST: O(V + E) time, O(V + E) space.
 def dfs_graph(graph, start):
     order, visited, stack = [], set(), [start]
     while stack:
@@ -338,8 +339,8 @@ def dfs_graph(graph, start):
     return order
 
 
-# WHEN: Visit every reachable vertex in breadth-first order.
-# NEED: Graph adjacency lists; vertices are hashable.
+# WHEN: Visit every vertex reachable from start in breadth-first order.
+# NEED: Hashable adjacency; neighbor-only keys may be absent; output is reachable only.
 # INVARIANT: queue holds the discovered frontier in nondecreasing distance.
 # MEMORIZE: mark when enqueued; pop from the left and enqueue unseen neighbors.
 # COST: O(V + E) time, O(V) space.
@@ -416,7 +417,7 @@ def grid_bfs_distance(grid, start, goal):
 
 
 # WHEN: Order directed vertices so every edge points forward.
-# NEED: num_nodes is non-negative; edge endpoints are numbered 0 through num_nodes - 1.
+# NEED: Non-negative integer node count; endpoints are in-range integer indices.
 # INVARIANT: indegree counts incoming edges not yet removed.
 # MEMORIZE: enqueue zero-indegree vertices; remove edges and enqueue new zeros.
 # COST: O(V + E) time, O(V + E) space.
@@ -445,7 +446,7 @@ def topological_sort(num_nodes, edges):
 
 
 # WHEN: Maintain connected components under repeated merges.
-# NEED: size is non-negative; nodes passed to operations are valid indices.
+# NEED: Non-negative integer size; operation nodes are in-range integer indices.
 # INVARIANT: each set has one representative root.
 # MEMORIZE: compress paths in find; attach the lower-rank root.
 # COST: O(alpha(n)) amortized per operation, O(n) space.
@@ -482,13 +483,14 @@ class UnionFind:
         return self.find(left) == self.find(right)
 
 
-# WHEN: Find weighted shortest paths from one source.
-# NEED: All edge weights are non-negative.
+# WHEN: Find shortest distances from one source to every reachable vertex.
+# NEED: Non-negative weights; neighbor-only keys may be absent; output is reachable only.
 # INVARIANT: the smallest live heap distance is final when popped.
 # MEMORIZE: relax edges; use a stale-entry check for lazy heap updates.
 # COST: O((V + E) log V) time, O(V + E) space.
 def dijkstra(graph, start):
-    for edges in graph.values():
+    normalized_graph = {node: list(edges) for node, edges in graph.items()}
+    for edges in normalized_graph.values():
         if any(weight < 0 for _, weight in edges):
             raise ValueError("Dijkstra requires non-negative weights")
     distances = {start: 0}
@@ -498,7 +500,7 @@ def dijkstra(graph, start):
         distance, _, node = heappop(heap)
         if distance != distances[node]:
             continue
-        for neighbor, weight in graph.get(node, []):
+        for neighbor, weight in normalized_graph.get(node, []):
             candidate = distance + weight
             if candidate < distances.get(neighbor, float("inf")):
                 distances[neighbor] = candidate
@@ -577,7 +579,7 @@ def combinations(nums, size):
 
 
 # WHEN: Maximize a sum using no adjacent items.
-# NEED: nums is an iterable of comparable numeric values.
+# NEED: nums is an iterable of comparable numeric values; selecting no items is allowed.
 # INVARIANT: rolling states are best totals through the previous two prefixes.
 # MEMORIZE: keep the old best or take this value plus the best before it.
 # COST: O(n) time, O(1) space.
@@ -650,9 +652,8 @@ def coin_change(coins, amount):
     return -1 if dp[amount] > amount else dp[amount]
 
 
-# WHEN: Select a maximum-size set of non-overlapping intervals.
-# NEED: intervals is a list or tuple; each interval is a list or tuple of
-# exactly two values, with start <= end.
+# WHEN: Select a maximum-size set of non-overlapping half-open intervals.
+# NEED: Outer/pair containers are list/tuple; endpoints are mutually orderable; start <= end.
 # INVARIANT: earliest finish leaves maximal room for later choices.
 # MEMORIZE: sort by end and accept intervals starting at last_end or later.
 # COST: O(n log n) time, O(n) space.
@@ -660,7 +661,8 @@ def interval_schedule(intervals):
     if not isinstance(intervals, (list, tuple)):
         raise ValueError("intervals must be a list or tuple")
     chosen = []
-    last_end = float("-inf")
+    has_last_end = False
+    last_end = None
     normalized = []
     for interval in intervals:
         try:
@@ -673,7 +675,8 @@ def interval_schedule(intervals):
     for start, end in sorted(normalized, key=lambda interval: interval[1]):
         if start > end:
             raise ValueError("interval start exceeds end")
-        if start >= last_end:
+        if not has_last_end or start >= last_end:
             chosen.append((start, end))
+            has_last_end = True
             last_end = end
     return chosen
