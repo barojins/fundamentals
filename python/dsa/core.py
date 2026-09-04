@@ -314,3 +314,173 @@ def level_order(root):
                 queue.append(node.right)
         answer.append(level)
     return answer
+
+
+# WHEN: Visit every reachable vertex in depth-first order.
+# NEED: Graph adjacency lists; vertices are hashable.
+# INVARIANT: visited contains exactly the vertices already emitted.
+# MEMORIZE: pop, skip visited, emit, then push neighbors in reverse order.
+# COST: O(V + E) time, O(V) space.
+def dfs_graph(graph, start):
+    order, visited, stack = [], set(), [start]
+    while stack:
+        node = stack.pop()
+        if node in visited:
+            continue
+        visited.add(node)
+        order.append(node)
+        stack.extend(reversed(graph.get(node, [])))
+    return order
+
+
+# WHEN: Visit every reachable vertex in breadth-first order.
+# NEED: Graph adjacency lists; vertices are hashable.
+# INVARIANT: queue holds the discovered frontier in nondecreasing distance.
+# MEMORIZE: mark when enqueued; pop from the left and enqueue unseen neighbors.
+# COST: O(V + E) time, O(V) space.
+def bfs_graph(graph, start):
+    order, visited, queue = [], {start}, deque([start])
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbor in graph.get(node, []):
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(neighbor)
+    return order
+
+
+# WHEN: Find all open cells reachable from a grid start.
+# NEED: 0 marks passable cells; movement is four-directional.
+# INVARIANT: visited contains exactly processed reachable open cells.
+# MEMORIZE: pop a cell, mark it, and push each in-bounds open neighbor.
+# COST: O(rows * cols) time, O(rows * cols) space.
+def grid_dfs(grid, start):
+    rows, cols = len(grid), len(grid[0]) if grid else 0
+    row, col = start
+    if not (0 <= row < rows and 0 <= col < cols) or grid[row][col] != 0:
+        return set()
+    visited, stack = set(), [start]
+    while stack:
+        row, col = stack.pop()
+        if (row, col) in visited:
+            continue
+        visited.add((row, col))
+        for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nr, nc = row + dr, col + dc
+            if 0 <= nr < rows and 0 <= nc < cols and grid[nr][nc] == 0:
+                stack.append((nr, nc))
+    return visited
+
+
+# WHEN: Find minimum four-directional moves between open grid cells.
+# NEED: 0 marks passable cells; endpoints must be in bounds and passable.
+# INVARIANT: queue processes cells by nondecreasing distance from start.
+# MEMORIZE: mark on enqueue; return when goal is reached.
+# COST: O(rows * cols) time, O(rows * cols) space.
+def grid_bfs_distance(grid, start, goal):
+    rows, cols = len(grid), len(grid[0]) if grid else 0
+    start_row, start_col = start
+    goal_row, goal_col = goal
+    valid_start = 0 <= start_row < rows and 0 <= start_col < cols
+    valid_goal = 0 <= goal_row < rows and 0 <= goal_col < cols
+    if not valid_start or not valid_goal:
+        return -1
+    if grid[start_row][start_col] != 0 or grid[goal_row][goal_col] != 0:
+        return -1
+    if start == goal:
+        return 0
+    queue, visited = deque([(start_row, start_col, 0)]), {start}
+    while queue:
+        row, col, distance = queue.popleft()
+        for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nr, nc = row + dr, col + dc
+            if not (0 <= nr < rows and 0 <= nc < cols):
+                continue
+            if grid[nr][nc] != 0 or (nr, nc) in visited:
+                continue
+            if (nr, nc) == goal:
+                return distance + 1
+            visited.add((nr, nc))
+            queue.append((nr, nc, distance + 1))
+    return -1
+
+
+# WHEN: Order directed vertices so every edge points forward.
+# NEED: Vertices are numbered 0 through num_nodes - 1.
+# INVARIANT: indegree counts incoming edges not yet removed.
+# MEMORIZE: enqueue zero-indegree vertices; remove edges and enqueue new zeros.
+# COST: O(V + E) time, O(V + E) space.
+def topological_sort(num_nodes, edges):
+    graph = [[] for _ in range(num_nodes)]
+    indegree = [0] * num_nodes
+    for source, target in edges:
+        graph[source].append(target)
+        indegree[target] += 1
+    queue = deque(node for node, degree in enumerate(indegree) if degree == 0)
+    order = []
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbor in graph[node]:
+            indegree[neighbor] -= 1
+            if indegree[neighbor] == 0:
+                queue.append(neighbor)
+    return order if len(order) == num_nodes else []
+
+
+# WHEN: Maintain connected components under repeated merges.
+# NEED: size is a non-negative number of elements; nodes are valid indices.
+# INVARIANT: each set has one representative root.
+# MEMORIZE: compress paths in find; attach the lower-rank root.
+# COST: O(alpha(n)) amortized per operation, O(n) space.
+class UnionFind:
+    def __init__(self, size):
+        if size < 0:
+            raise ValueError("size must be non-negative")
+        self.parent = list(range(size))
+        self.rank = [0] * size
+
+    def find(self, node):
+        while node != self.parent[node]:
+            self.parent[node] = self.parent[self.parent[node]]
+            node = self.parent[node]
+        return node
+
+    def union(self, left, right):
+        root_left, root_right = self.find(left), self.find(right)
+        if root_left == root_right:
+            return False
+        if self.rank[root_left] < self.rank[root_right]:
+            root_left, root_right = root_right, root_left
+        self.parent[root_right] = root_left
+        if self.rank[root_left] == self.rank[root_right]:
+            self.rank[root_left] += 1
+        return True
+
+    def connected(self, left, right):
+        return self.find(left) == self.find(right)
+
+
+# WHEN: Find weighted shortest paths from one source.
+# NEED: All edge weights are non-negative.
+# INVARIANT: the smallest live heap distance is final when popped.
+# MEMORIZE: relax edges; use a stale-entry check for lazy heap updates.
+# COST: O((V + E) log V) time, O(V + E) space.
+def dijkstra(graph, start):
+    for edges in graph.values():
+        if any(weight < 0 for _, weight in edges):
+            raise ValueError("Dijkstra requires non-negative weights")
+    distances = {start: 0}
+    sequence = count()
+    heap = [(0, next(sequence), start)]
+    while heap:
+        distance, _, node = heappop(heap)
+        if distance != distances[node]:
+            continue
+        for neighbor, weight in graph.get(node, []):
+            candidate = distance + weight
+            if candidate < distances.get(neighbor, float("inf")):
+                distances[neighbor] = candidate
+                heappush(heap, (candidate, next(sequence), neighbor))
+    return distances

@@ -4,8 +4,14 @@ import unittest
 from python.dsa.core import (
     ListNode,
     TreeNode,
+    UnionFind,
+    bfs_graph,
     binary_search,
+    dfs_graph,
+    dijkstra,
     frequencies,
+    grid_bfs_distance,
+    grid_dfs,
     has_cycle,
     inorder_iterative,
     level_order,
@@ -21,6 +27,7 @@ from python.dsa.core import (
     range_sum,
     reverse_list,
     top_k,
+    topological_sort,
     two_sum_sorted,
 )
 
@@ -89,6 +96,34 @@ class LinkedTreeCoreTests(unittest.TestCase):
         self.assertEqual(postorder(root), [4, 5, 2, 3, 1])
         self.assertEqual(level_order(root), [[1], [2, 3], [4, 5]])
         self.assertEqual(level_order(None), [])
+
+
+class GraphCoreTests(unittest.TestCase):
+    def test_graph_and_grid_traversal(self):
+        graph = {0: [1, 2], 1: [2], 2: [3], 3: []}
+        self.assertEqual(dfs_graph(graph, 0), [0, 1, 2, 3])
+        self.assertEqual(bfs_graph(graph, 0), [0, 1, 2, 3])
+        grid = [[0, 0, 1], [1, 0, 0], [1, 1, 0]]
+        self.assertEqual(grid_dfs(grid, (0, 0)), {(0, 0), (0, 1), (1, 1), (1, 2), (2, 2)})
+        self.assertEqual(grid_bfs_distance(grid, (0, 0), (2, 2)), 4)
+
+    def test_topology_union_find_and_dijkstra(self):
+        self.assertEqual(topological_sort(4, [(0, 1), (0, 2), (1, 3), (2, 3)]), [0, 1, 2, 3])
+        self.assertEqual(topological_sort(2, [(0, 1), (1, 0)]), [])
+        groups = UnionFind(4)
+        self.assertTrue(groups.union(0, 1))
+        self.assertFalse(groups.union(0, 1))
+        self.assertFalse(groups.connected(0, 2))
+        groups.union(1, 2)
+        self.assertTrue(groups.connected(0, 2))
+        graph = {"a": [("b", 4), ("c", 1)], "c": [("b", 2)], "b": []}
+        self.assertEqual(dijkstra(graph, "a"), {"a": 0, "c": 1, "b": 3})
+
+    def test_graph_preconditions(self):
+        with self.assertRaises(ValueError):
+            dijkstra({0: [(1, -1)]}, 0)
+        with self.assertRaises(ValueError):
+            UnionFind(-1)
 
 
 if __name__ == "__main__":
