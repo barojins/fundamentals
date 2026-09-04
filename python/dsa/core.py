@@ -351,12 +351,14 @@ def bfs_graph(graph, start):
 
 
 # WHEN: Find all open cells reachable from a grid start.
-# NEED: 0 marks passable cells; movement is four-directional.
+# NEED: 0 marks passable cells; movement is four-directional; grid is rectangular.
 # INVARIANT: visited contains exactly processed reachable open cells.
 # MEMORIZE: pop a cell, mark it, and push each in-bounds open neighbor.
 # COST: O(rows * cols) time, O(rows * cols) space.
 def grid_dfs(grid, start):
     rows, cols = len(grid), len(grid[0]) if grid else 0
+    if any(len(row) != cols for row in grid):
+        raise ValueError("grid must be rectangular")
     row, col = start
     if not (0 <= row < rows and 0 <= col < cols) or grid[row][col] != 0:
         return set()
@@ -374,12 +376,14 @@ def grid_dfs(grid, start):
 
 
 # WHEN: Find minimum four-directional moves between open grid cells.
-# NEED: 0 marks passable cells; endpoints must be in bounds and passable.
+# NEED: 0 marks passable cells; grid is rectangular; endpoints must be in bounds and passable.
 # INVARIANT: queue processes cells by nondecreasing distance from start.
 # MEMORIZE: mark on enqueue; return when goal is reached.
 # COST: O(rows * cols) time, O(rows * cols) space.
 def grid_bfs_distance(grid, start, goal):
     rows, cols = len(grid), len(grid[0]) if grid else 0
+    if any(len(row) != cols for row in grid):
+        raise ValueError("grid must be rectangular")
     start_row, start_col = start
     goal_row, goal_col = goal
     valid_start = 0 <= start_row < rows and 0 <= start_col < cols
@@ -407,11 +411,17 @@ def grid_bfs_distance(grid, start, goal):
 
 
 # WHEN: Order directed vertices so every edge points forward.
-# NEED: Vertices are numbered 0 through num_nodes - 1.
+# NEED: num_nodes is non-negative; edge endpoints are numbered 0 through num_nodes - 1.
 # INVARIANT: indegree counts incoming edges not yet removed.
 # MEMORIZE: enqueue zero-indegree vertices; remove edges and enqueue new zeros.
 # COST: O(V + E) time, O(V + E) space.
 def topological_sort(num_nodes, edges):
+    if num_nodes < 0:
+        raise ValueError("num_nodes must be non-negative")
+    edges = list(edges)
+    for source, target in edges:
+        if not (0 <= source < num_nodes and 0 <= target < num_nodes):
+            raise ValueError("edge endpoint out of bounds")
     graph = [[] for _ in range(num_nodes)]
     indegree = [0] * num_nodes
     for source, target in edges:
@@ -430,7 +440,7 @@ def topological_sort(num_nodes, edges):
 
 
 # WHEN: Maintain connected components under repeated merges.
-# NEED: size is a non-negative number of elements; nodes are valid indices.
+# NEED: size is non-negative; nodes passed to operations are valid indices.
 # INVARIANT: each set has one representative root.
 # MEMORIZE: compress paths in find; attach the lower-rank root.
 # COST: O(alpha(n)) amortized per operation, O(n) space.
@@ -441,7 +451,12 @@ class UnionFind:
         self.parent = list(range(size))
         self.rank = [0] * size
 
+    def _validate_node(self, node):
+        if not 0 <= node < len(self.parent):
+            raise ValueError("node out of bounds")
+
     def find(self, node):
+        self._validate_node(node)
         while node != self.parent[node]:
             self.parent[node] = self.parent[self.parent[node]]
             node = self.parent[node]

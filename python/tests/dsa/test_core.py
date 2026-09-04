@@ -124,6 +124,26 @@ class GraphCoreTests(unittest.TestCase):
             dijkstra({0: [(1, -1)]}, 0)
         with self.assertRaises(ValueError):
             UnionFind(-1)
+        with self.assertRaises(ValueError):
+            topological_sort(-1, [])
+        with self.assertRaises(ValueError):
+            topological_sort(2, [(-1, 1)])
+        with self.assertRaises(ValueError):
+            topological_sort(2, [(0, 2)])
+
+        groups = UnionFind(2)
+        with self.assertRaises(ValueError):
+            groups.find(-1)
+        with self.assertRaises(ValueError):
+            groups.union(0, 2)
+        with self.assertRaises(ValueError):
+            groups.connected(2, 0)
+
+        ragged_grid = [[0, 0], [0]]
+        with self.assertRaises(ValueError):
+            grid_dfs(ragged_grid, (0, 0))
+        with self.assertRaises(ValueError):
+            grid_bfs_distance(ragged_grid, (0, 0), (1, 0))
 
 
 if __name__ == "__main__":
