@@ -191,11 +191,19 @@ class CombinatorialCoreTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             interval_schedule(["12"])
         with self.assertRaises(ValueError):
+            interval_schedule({(1, 2)})
+        with self.assertRaises(ValueError):
+            interval_schedule({(1, 2): "interval"})
+        with self.assertRaises(ValueError):
             min_grid_path_sum([[1], 2])
         with self.assertRaises(ValueError):
             min_grid_path_sum([[1], {2}])
         with self.assertRaises(ValueError):
             min_grid_path_sum([[1], {"value": 2}])
+        with self.assertRaises(ValueError):
+            min_grid_path_sum({"row": [1]})
+        with self.assertRaises(ValueError):
+            min_grid_path_sum({(1,)})
 
 
 if __name__ == "__main__":

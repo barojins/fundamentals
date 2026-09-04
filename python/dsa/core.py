@@ -584,11 +584,13 @@ def max_non_adjacent_sum(nums):
 
 
 # WHEN: Find the minimum right/down path sum in a grid.
-# NEED: grid is non-empty; every row is a non-empty list or tuple of equal length.
+# NEED: grid is a non-empty list or tuple; each row is a non-empty list or tuple of equal length.
 # INVARIANT: dp[col] is the best cost to the current cell after update.
 # MEMORIZE: current cost is value plus the cheaper above/left predecessor.
 # COST: O(rows * cols) time, O(cols) space.
 def min_grid_path_sum(grid):
+    if not isinstance(grid, (list, tuple)):
+        raise ValueError("grid must be a list or tuple")
     try:
         if not grid or not isinstance(grid[0], (list, tuple)) or not grid[0]:
             raise ValueError("grid must be non-empty")
@@ -644,11 +646,14 @@ def coin_change(coins, amount):
 
 
 # WHEN: Select a maximum-size set of non-overlapping intervals.
-# NEED: each interval is a list or tuple of exactly two values, with start <= end.
+# NEED: intervals is a list or tuple; each interval is a list or tuple of
+# exactly two values, with start <= end.
 # INVARIANT: earliest finish leaves maximal room for later choices.
 # MEMORIZE: sort by end and accept intervals starting at last_end or later.
 # COST: O(n log n) time, O(n) space.
 def interval_schedule(intervals):
+    if not isinstance(intervals, (list, tuple)):
+        raise ValueError("intervals must be a list or tuple")
     chosen = []
     last_end = float("-inf")
     normalized = []
