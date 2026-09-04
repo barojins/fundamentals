@@ -189,3 +189,128 @@ def top_k(nums, k):
     if k < 0:
         raise ValueError("k must be non-negative")
     return nlargest(k, nums)
+
+
+# WHEN: Reverse a singly linked list in place.
+# NEED: head is a ListNode or None.
+# INVARIANT: prev is the reversed prefix; head is the unprocessed suffix.
+# MEMORIZE: save next; point head backward; advance both pointers.
+# COST: O(n) time, O(1) space.
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+def reverse_list(head):
+    prev = None
+    while head:
+        next_node = head.next
+        head.next = prev
+        prev, head = head, next_node
+    return prev
+
+
+# WHEN: Detect whether a singly linked list contains a cycle.
+# NEED: head is a ListNode or None.
+# INVARIANT: slow advances one step and fast advances two steps.
+# MEMORIZE: equal pointers imply the fast pointer lapped the slow pointer.
+# COST: O(n) time, O(1) space.
+def has_cycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:
+            return True
+    return False
+
+
+# WHEN: Represent a binary-tree node for traversal patterns.
+# NEED: left and right are TreeNode instances or None.
+# INVARIANT: each node stores its value and its two child references.
+# MEMORIZE: node.left and node.right are the recursive branches.
+# COST: O(1) construction time and space.
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+
+# WHEN: Visit a binary tree in root-left-right order.
+# NEED: root is a TreeNode or None.
+# INVARIANT: answer contains preorder values for every processed subtree.
+# MEMORIZE: append node, then recurse left and right.
+# COST: O(n) time, O(h) recursion space.
+def preorder(root):
+    answer = []
+
+    def dfs(node):
+        if not node:
+            return
+        answer.append(node.val)
+        dfs(node.left)
+        dfs(node.right)
+
+    dfs(root)
+    return answer
+
+
+# WHEN: Visit a binary tree in left-root-right order without recursion.
+# NEED: root is a TreeNode or None.
+# INVARIANT: stack stores ancestors whose left subtrees are processed.
+# MEMORIZE: push left spine; pop, visit, then move right.
+# COST: O(n) time, O(h) space.
+def inorder_iterative(root):
+    answer, stack = [], []
+    while root or stack:
+        while root:
+            stack.append(root)
+            root = root.left
+        root = stack.pop()
+        answer.append(root.val)
+        root = root.right
+    return answer
+
+
+# WHEN: Visit a binary tree in left-right-root order.
+# NEED: root is a TreeNode or None.
+# INVARIANT: answer contains postorder values for every processed subtree.
+# MEMORIZE: recurse left and right, then append node.
+# COST: O(n) time, O(h) recursion space.
+def postorder(root):
+    answer = []
+
+    def dfs(node):
+        if not node:
+            return
+        dfs(node.left)
+        dfs(node.right)
+        answer.append(node.val)
+
+    dfs(root)
+    return answer
+
+
+# WHEN: Visit a binary tree one depth level at a time.
+# NEED: root is a TreeNode or None.
+# INVARIANT: queue contains exactly the frontier for the next levels.
+# MEMORIZE: process the current queue length as one level.
+# COST: O(n) time, O(w) space.
+def level_order(root):
+    if not root:
+        return []
+    answer = []
+    queue = deque([root])
+    while queue:
+        level = []
+        for _ in range(len(queue)):
+            node = queue.popleft()
+            level.append(node.val)
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+        answer.append(level)
+    return answer

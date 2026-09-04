@@ -2,16 +2,24 @@
 import unittest
 
 from python.dsa.core import (
+    ListNode,
+    TreeNode,
     binary_search,
     frequencies,
+    has_cycle,
+    inorder_iterative,
+    level_order,
     longest_unique_substring,
     lower_bound,
     max_subarray,
     max_window_sum,
     merge_intervals,
     next_greater,
+    postorder,
     prefix_sums,
+    preorder,
     range_sum,
+    reverse_list,
     top_k,
     two_sum_sorted,
 )
@@ -57,6 +65,30 @@ class LinearCoreTests(unittest.TestCase):
             merge_intervals([[1, 3], []])
         with self.assertRaises(ValueError):
             merge_intervals([[1]])
+
+
+class LinkedTreeCoreTests(unittest.TestCase):
+    def test_reverse_list_and_cycle(self):
+        head = ListNode(1, ListNode(2, ListNode(3)))
+        reversed_head = reverse_list(head)
+        values = []
+        while reversed_head is not None:
+            values.append(reversed_head.val)
+            reversed_head = reversed_head.next
+        self.assertEqual(values, [3, 2, 1])
+
+        cycle = ListNode(1, ListNode(2))
+        cycle.next.next = cycle  # pyright: ignore[reportOptionalMemberAccess]
+        self.assertTrue(has_cycle(cycle))
+        self.assertFalse(has_cycle(ListNode(1)))
+
+    def test_tree_traversals(self):
+        root = TreeNode(1, TreeNode(2, TreeNode(4), TreeNode(5)), TreeNode(3))
+        self.assertEqual(preorder(root), [1, 2, 4, 5, 3])
+        self.assertEqual(inorder_iterative(root), [4, 2, 5, 1, 3])
+        self.assertEqual(postorder(root), [4, 5, 2, 3, 1])
+        self.assertEqual(level_order(root), [[1], [2, 3], [4, 5]])
+        self.assertEqual(level_order(None), [])
 
 
 if __name__ == "__main__":
