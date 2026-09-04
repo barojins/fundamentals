@@ -40,6 +40,50 @@ from python.dsa.core import (
 )
 
 
+class CoreCatalogTests(unittest.TestCase):
+    def test_every_required_core_symbol_is_public(self):
+        import python.dsa.core as core
+
+        required = {
+            "frequencies",
+            "two_sum_sorted",
+            "max_window_sum",
+            "longest_unique_substring",
+            "prefix_sums",
+            "range_sum",
+            "max_subarray",
+            "binary_search",
+            "lower_bound",
+            "next_greater",
+            "merge_intervals",
+            "top_k",
+            "ListNode",
+            "reverse_list",
+            "has_cycle",
+            "TreeNode",
+            "preorder",
+            "inorder_iterative",
+            "postorder",
+            "level_order",
+            "dfs_graph",
+            "bfs_graph",
+            "grid_dfs",
+            "grid_bfs_distance",
+            "topological_sort",
+            "UnionFind",
+            "dijkstra",
+            "subsets",
+            "permutations",
+            "combinations",
+            "max_non_adjacent_sum",
+            "min_grid_path_sum",
+            "knapsack_01",
+            "coin_change",
+            "interval_schedule",
+        }
+        self.assertTrue(required <= set(vars(core)))
+
+
 class LinearCoreTests(unittest.TestCase):
     def test_hash_map_and_array_patterns(self):
         self.assertEqual(frequencies("banana"), {"b": 1, "a": 3, "n": 2})

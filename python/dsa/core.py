@@ -191,17 +191,22 @@ def top_k(nums, k):
     return nlargest(k, nums)
 
 
-# WHEN: Reverse a singly linked list in place.
-# NEED: head is a ListNode or None.
-# INVARIANT: prev is the reversed prefix; head is the unprocessed suffix.
-# MEMORIZE: save next; point head backward; advance both pointers.
-# COST: O(n) time, O(1) space.
+# WHEN: Model or construct a singly linked list.
+# NEED: next is a ListNode or None.
+# INVARIANT: each node stores one value and one next-node reference.
+# MEMORIZE: node.val holds data; node.next links the remaining list.
+# COST: O(1) construction time and space.
 class ListNode:
     def __init__(self, val=0, next=None):
         self.val = val
         self.next = next
 
 
+# WHEN: Reverse a singly linked list in place.
+# NEED: head is a ListNode or None.
+# INVARIANT: prev is the reversed prefix; head is the unprocessed suffix.
+# MEMORIZE: save next; point head backward; advance both pointers.
+# COST: O(n) time, O(1) space.
 def reverse_list(head):
     prev = None
     while head:
@@ -502,7 +507,7 @@ def dijkstra(graph, start):
 
 
 # WHEN: Include or exclude every item to generate all subsets.
-# NEED: nums is an iterable of values.
+# NEED: nums is an indexable sequence of values.
 # INVARIANT: path stores decisions made before index; recurse twice and undo.
 # MEMORIZE: branch without the item, then branch with it.
 # COST: O(n * 2^n) time, O(n) space excluding output.
@@ -523,7 +528,7 @@ def subsets(nums):
 
 
 # WHEN: Generate every ordering of the input items.
-# NEED: nums is an iterable of values.
+# NEED: nums is an indexable sequence of values.
 # INVARIANT: used[i] says whether item i is already in path.
 # MEMORIZE: choose an unused item, recurse, then undo the choice.
 # COST: O(n * n!) time, O(n) space excluding output.
@@ -548,7 +553,7 @@ def permutations(nums):
 
 
 # WHEN: Choose exactly size items without regard to order.
-# NEED: size is non-negative; nums is an iterable of values.
+# NEED: size is non-negative; nums is an indexable sequence of values.
 # INVARIANT: future choices start after the last chosen index.
 # MEMORIZE: append a choice, recurse from index + 1, then pop it.
 # COST: O(size * C(n, size)) time, O(size) space excluding output.
