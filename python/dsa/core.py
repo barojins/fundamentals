@@ -589,11 +589,19 @@ def max_non_adjacent_sum(nums):
 # MEMORIZE: current cost is value plus the cheaper above/left predecessor.
 # COST: O(rows * cols) time, O(cols) space.
 def min_grid_path_sum(grid):
-    if not grid or not grid[0]:
-        raise ValueError("grid must be non-empty")
-    cols = len(grid[0])
-    if any(len(row) != cols for row in grid):
-        raise ValueError("grid must be rectangular")
+    try:
+        if not grid or not grid[0]:
+            raise ValueError("grid must be non-empty")
+        cols = len(grid[0])
+    except (TypeError, IndexError):
+        raise ValueError("grid must be non-empty") from None
+    for row in grid:
+        try:
+            row_length = len(row)
+        except TypeError:
+            raise ValueError("grid rows must be sequences") from None
+        if row_length != cols:
+            raise ValueError("grid must be rectangular")
     dp = [float("inf")] * cols
     dp[0] = 0
     for row in grid:
@@ -644,7 +652,16 @@ def coin_change(coins, amount):
 def interval_schedule(intervals):
     chosen = []
     last_end = float("-inf")
-    for start, end in sorted(intervals, key=lambda interval: interval[1]):
+    normalized = []
+    for interval in intervals:
+        try:
+            if len(interval) != 2:
+                raise ValueError("interval must contain start and end")
+            start, end = interval
+        except (TypeError, ValueError):
+            raise ValueError("interval must contain start and end") from None
+        normalized.append((start, end))
+    for start, end in sorted(normalized, key=lambda interval: interval[1]):
         if start > end:
             raise ValueError("interval start exceeds end")
         if start >= last_end:

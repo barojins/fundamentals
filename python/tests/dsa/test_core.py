@@ -182,6 +182,12 @@ class CombinatorialCoreTests(unittest.TestCase):
             knapsack_01([1], [2, 3], 4)
         with self.assertRaises(ValueError):
             coin_change([0, 1], 3)
+        with self.assertRaises(ValueError):
+            interval_schedule([(1,)])
+        with self.assertRaises(ValueError):
+            interval_schedule([1, 2])
+        with self.assertRaises(ValueError):
+            min_grid_path_sum([[1], 2])
 
 
 if __name__ == "__main__":
