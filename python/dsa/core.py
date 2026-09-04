@@ -584,22 +584,21 @@ def max_non_adjacent_sum(nums):
 
 
 # WHEN: Find the minimum right/down path sum in a grid.
-# NEED: grid is non-empty and rectangular.
+# NEED: grid is non-empty; every row is a non-empty list or tuple of equal length.
 # INVARIANT: dp[col] is the best cost to the current cell after update.
 # MEMORIZE: current cost is value plus the cheaper above/left predecessor.
 # COST: O(rows * cols) time, O(cols) space.
 def min_grid_path_sum(grid):
     try:
-        if not grid or not grid[0]:
+        if not grid or not isinstance(grid[0], (list, tuple)) or not grid[0]:
             raise ValueError("grid must be non-empty")
         cols = len(grid[0])
     except (TypeError, IndexError):
         raise ValueError("grid must be non-empty") from None
     for row in grid:
-        try:
-            row_length = len(row)
-        except TypeError:
-            raise ValueError("grid rows must be sequences") from None
+        if not isinstance(row, (list, tuple)):
+            raise ValueError("grid rows must be lists or tuples")
+        row_length = len(row)
         if row_length != cols:
             raise ValueError("grid must be rectangular")
     dp = [float("inf")] * cols
@@ -645,7 +644,7 @@ def coin_change(coins, amount):
 
 
 # WHEN: Select a maximum-size set of non-overlapping intervals.
-# NEED: each interval has start <= end; endpoints may touch.
+# NEED: each interval is a list or tuple of exactly two values, with start <= end.
 # INVARIANT: earliest finish leaves maximal room for later choices.
 # MEMORIZE: sort by end and accept intervals starting at last_end or later.
 # COST: O(n log n) time, O(n) space.
@@ -655,7 +654,7 @@ def interval_schedule(intervals):
     normalized = []
     for interval in intervals:
         try:
-            if len(interval) != 2:
+            if not isinstance(interval, (list, tuple)) or len(interval) != 2:
                 raise ValueError("interval must contain start and end")
             start, end = interval
         except (TypeError, ValueError):
