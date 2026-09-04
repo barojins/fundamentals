@@ -1,3 +1,4 @@
+# pyright: basic
 import unittest
 
 from python.dsa.core import (
@@ -48,6 +49,14 @@ class LinearCoreTests(unittest.TestCase):
             max_subarray([])
         with self.assertRaises(ValueError):
             top_k([1, 2], -1)
+        with self.assertRaises(ValueError):
+            range_sum([0, 2, 1, 5, 8], -1, 2)
+        with self.assertRaises(ValueError):
+            range_sum([0, 2, 1, 5, 8], 1, 4)
+        with self.assertRaises(ValueError):
+            merge_intervals([[1, 3], []])
+        with self.assertRaises(ValueError):
+            merge_intervals([[1]])
 
 
 if __name__ == "__main__":

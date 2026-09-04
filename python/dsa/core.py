@@ -1,10 +1,9 @@
 """DSA foundations worth reconstructing from memory."""
+# pyright: basic
 
-from collections import deque  # noqa: F401  # pyright: ignore[reportUnusedImport]
-from collections.abc import Iterable, Sequence
-from heapq import heappop, heappush, nlargest  # noqa: F401  # pyright: ignore[reportUnusedImport]
-from itertools import count  # noqa: F401  # pyright: ignore[reportUnusedImport]
-from typing import Any
+from collections import deque  # noqa: F401
+from heapq import heappop, heappush, nlargest  # noqa: F401
+from itertools import count  # noqa: F401
 
 
 # WHEN: Count occurrences, detect duplicates, or compare collections.
@@ -12,8 +11,8 @@ from typing import Any
 # INVARIANT: counts contains exact frequencies for the processed prefix.
 # MEMORIZE: counts[x] = counts.get(x, 0) + 1
 # COST: O(n) time, O(u) space.
-def frequencies(items: Iterable[Any]) -> dict[Any, int]:
-    counts: dict[Any, int] = {}
+def frequencies(items):
+    counts = {}
     for item in items:
         counts[item] = counts.get(item, 0) + 1
     return counts
@@ -24,7 +23,7 @@ def frequencies(items: Iterable[Any]) -> dict[Any, int]:
 # INVARIANT: Every discarded pair cannot reach target.
 # MEMORIZE: move left up when total is small; right down when large.
 # COST: O(n) time, O(1) space.
-def two_sum_sorted(nums: Sequence[Any], target: Any) -> tuple[int, int] | None:
+def two_sum_sorted(nums, target):
     left, right = 0, len(nums) - 1
     while left < right:
         total = nums[left] + nums[right]
@@ -42,7 +41,7 @@ def two_sum_sorted(nums: Sequence[Any], target: Any) -> tuple[int, int] | None:
 # INVARIANT: window is the sum of nums[right-k+1:right+1].
 # MEMORIZE: add incoming value; subtract outgoing value.
 # COST: O(n) time, O(1) space.
-def max_window_sum(nums: Sequence[Any], k: int) -> Any:
+def max_window_sum(nums, k):
     if k <= 0 or k > len(nums):
         raise ValueError("invalid window size")
     window = sum(nums[:k])
@@ -58,8 +57,8 @@ def max_window_sum(nums: Sequence[Any], k: int) -> Any:
 # INVARIANT: text[left:right+1] has unique characters.
 # MEMORIZE: left = max(left, last.get(char, -1) + 1)
 # COST: O(n) time, O(u) space.
-def longest_unique_substring(text: str) -> int:
-    last: dict[str, int] = {}
+def longest_unique_substring(text):
+    last = {}
     left = answer = 0
     for right, char in enumerate(text):
         left = max(left, last.get(char, -1) + 1)
@@ -73,8 +72,8 @@ def longest_unique_substring(text: str) -> int:
 # INVARIANT: prefix[i] is the sum of nums before index i.
 # MEMORIZE: prefix.append(prefix[-1] + num)
 # COST: O(n) time, O(n) space.
-def prefix_sums(nums: Iterable[Any]) -> list[Any]:
-    prefix: list[Any] = [0]
+def prefix_sums(nums):
+    prefix = [0]
     for num in nums:
         prefix.append(prefix[-1] + num)
     return prefix
@@ -85,7 +84,9 @@ def prefix_sums(nums: Iterable[Any]) -> list[Any]:
 # INVARIANT: prefix[right + 1] includes exactly through right.
 # MEMORIZE: sum(left..right) = prefix[right+1] - prefix[left]
 # COST: O(1) time, O(1) space.
-def range_sum(prefix: Sequence[Any], left: int, right: int) -> Any:
+def range_sum(prefix, left, right):
+    if left < 0 or right < left or right + 1 >= len(prefix):
+        raise ValueError("invalid range bounds")
     return prefix[right + 1] - prefix[left]
 
 
@@ -94,7 +95,7 @@ def range_sum(prefix: Sequence[Any], left: int, right: int) -> Any:
 # INVARIANT: current is the best subarray sum ending at this position.
 # MEMORIZE: current = max(num, current + num)
 # COST: O(n) time, O(1) space.
-def max_subarray(nums: Sequence[Any]) -> Any:
+def max_subarray(nums):
     if not nums:
         raise ValueError("nums is empty")
     current = answer = nums[0]
@@ -109,7 +110,7 @@ def max_subarray(nums: Sequence[Any]) -> Any:
 # INVARIANT: If target exists, it remains in [left, right].
 # MEMORIZE: compare nums[mid], then halve the search interval.
 # COST: O(log n) time, O(1) space.
-def binary_search(nums: Sequence[Any], target: Any) -> int:
+def binary_search(nums, target):
     left, right = 0, len(nums) - 1
     while left <= right:
         mid = (left + right) // 2
@@ -127,7 +128,7 @@ def binary_search(nums: Sequence[Any], target: Any) -> int:
 # INVARIANT: Answer remains in [left, right]; discarded values are too small.
 # MEMORIZE: nums[mid] < target moves left; otherwise move right.
 # COST: O(log n) time, O(1) space.
-def lower_bound(nums: Sequence[Any], target: Any) -> int:
+def lower_bound(nums, target):
     left, right = 0, len(nums)
     while left < right:
         mid = (left + right) // 2
@@ -143,9 +144,9 @@ def lower_bound(nums: Sequence[Any], target: Any) -> int:
 # INVARIANT: stack holds unresolved indices in decreasing value order.
 # MEMORIZE: pop while nums[stack[-1]] < num, then push current index.
 # COST: O(n) time, O(n) space.
-def next_greater(nums: Sequence[Any]) -> list[Any]:
-    answer: list[Any] = [-1] * len(nums)
-    stack: list[int] = []
+def next_greater(nums):
+    answer = [-1] * len(nums)
+    stack = []
     for i, num in enumerate(nums):
         while stack and nums[stack[-1]] < num:
             answer[stack.pop()] = num
@@ -158,9 +159,18 @@ def next_greater(nums: Sequence[Any]) -> list[Any]:
 # INVARIANT: answer is merged and sorted for all processed intervals.
 # MEMORIZE: append disjoint; otherwise extend answer[-1][1].
 # COST: O(n log n) time, O(n) space.
-def merge_intervals(intervals: Iterable[Sequence[Any]]) -> list[list[Any]]:
-    answer: list[list[Any]] = []
-    for start, end in sorted(intervals, key=lambda interval: interval[0]):
+def merge_intervals(intervals):
+    answer = []
+    normalized = []
+    for interval in intervals:
+        try:
+            if len(interval) != 2:
+                raise ValueError("interval must contain start and end")
+            start, end = interval
+        except (TypeError, ValueError):
+            raise ValueError("interval must contain start and end") from None
+        normalized.append((start, end))
+    for start, end in sorted(normalized):
         if start > end:
             raise ValueError("interval start exceeds end")
         if not answer or start > answer[-1][1]:
@@ -175,7 +185,7 @@ def merge_intervals(intervals: Iterable[Sequence[Any]]) -> list[list[Any]]:
 # INVARIANT: Heap-based selection retains the largest requested values.
 # MEMORIZE: nlargest(k, nums) returns descending order.
 # COST: O(n log k) time, O(k) space.
-def top_k(nums: Iterable[Any], k: int) -> list[Any]:
+def top_k(nums, k):
     if k < 0:
         raise ValueError("k must be non-negative")
     return nlargest(k, nums)
